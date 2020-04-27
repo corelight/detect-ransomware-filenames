@@ -1,6 +1,6 @@
 # @load policy/protocols/smb
 
-module check-for-ransomware-filenames;
+module checkforransomwarefilenames;
 
 type Idx: record {
 	index: count;
