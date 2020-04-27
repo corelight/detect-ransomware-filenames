@@ -4,8 +4,10 @@
 # transactions to see if any file transactions use any known filenames/patterns
 # that are known to be associated with ransomware.
 #
-# Either place the file fsrm_patterns_for_zeek.tsv in the same directory as this file
-# or modify the script below to reference the file by its absolute path
+# May need to tweak the path of the fsrm_patterns_for_zeek.tsv filename below
+# depending on how you're using this. For example, put the script and the tsv
+# into /etc/corelight on a software sensor, and adjust the filename below to
+# use the absolute path /etc/corelight/fsrm_filenames_for_zeek.tsv
 
 module checkforransomwarefilenames;
 
@@ -32,7 +34,7 @@ global ransomware_filename_patterns_paraglob = paraglob_init(ransomware_filename
 
 event zeek_init()
 	{
-	Input::add_table([$source="./fsrm_patterns_for_zeek.tsv", $name="ransomware_patterns", $idx=Idx, $val=Val, $destination=ransomware_filename_patterns_table, $mode=Input::REREAD]);
+	Input::add_table([$source="fsrm_patterns_for_zeek.tsv", $name="ransomware_patterns", $idx=Idx, $val=Val, $destination=ransomware_filename_patterns_table, $mode=Input::REREAD]);
   Input::remove("ransomware_patterns");
 	}
 

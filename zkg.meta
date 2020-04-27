@@ -1,0 +1,3 @@
+[package]
+description = Watch SMB transactions for files whose filename matches patterns known to be used by ransomware
+script_dir = scripts
