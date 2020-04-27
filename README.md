@@ -8,7 +8,8 @@ A Python script is included to be able to refresh the list periodically.
 
 The script generates notices like the following:
 
-```{
+```
+{
   "_path": "notice",
   "_system_name": "bas-cl-swsensor-01",
   "_write_ts": "2020-04-27T21:40:10.494579Z",
@@ -24,4 +25,5 @@ The script generates notices like the following:
     "Notice::ACTION_LOG"
   ],
   "suppress_for": 3600
-}```
+}
+```
