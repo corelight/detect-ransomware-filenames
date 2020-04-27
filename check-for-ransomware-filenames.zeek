@@ -1,5 +1,12 @@
 # @load policy/protocols/smb
 
+# This script loads a file fsrm_patterns_for_zeek.tsv and then watches SMB file
+# transactions to see if any file transactions use any known filenames/patterns
+# that are known to be associated with ransomware.
+#
+# Either place the file fsrm_patterns_for_zeek.tsv in the same directory as this file
+# or modify the script below to reference the file by its absolute path
+
 module checkforransomwarefilenames;
 
 type Idx: record {
@@ -25,7 +32,7 @@ global ransomware_filename_patterns_paraglob = paraglob_init(ransomware_filename
 
 event zeek_init()
 	{
-	Input::add_table([$source="fsrm_patterns_for_zeek.tsv", $name="ransomware_patterns", $idx=Idx, $val=Val, $destination=ransomware_filename_patterns_table, $mode=Input::REREAD]);
+	Input::add_table([$source="./fsrm_patterns_for_zeek.tsv", $name="ransomware_patterns", $idx=Idx, $val=Val, $destination=ransomware_filename_patterns_table, $mode=Input::REREAD]);
   Input::remove("ransomware_patterns");
 	}
 
