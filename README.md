@@ -4,7 +4,13 @@ This package/script watches SMB transactions to look for known bad filenames
 that ransomware is known to use. It rides on top of the Anti-Ransomware File
 System Resource Manager Lists maintained [here](https://fsrm.experiant.ca/).
 
-A Python script is included to be able to refresh the list periodically.
+## How to use
+
+A Python script (`download-list.py`) is included to be able to refresh the
+list periodically. By default, it will download the new file to the `inputs/`
+folder.
+
+Use `zkg` to install this, the way you would any Zeek package.
 
 The script generates notices like the following:
 
@@ -27,3 +33,10 @@ The script generates notices like the following:
   "suppress_for": 3600
 }
 ```
+
+If/when you get a notice, investigate, ideally as quickly as possible!
+
+## License
+
+Please read the license file [here](./LICENSE) for information about the license
+for this software.
