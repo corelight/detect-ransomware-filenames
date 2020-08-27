@@ -40,43 +40,45 @@ event zeek_init()
 
 event Input::end_of_data(name: string, source: string)
   {
-  if (name == "ransomware_patterns")
-    {
-    # Now all data is in the table
-    # Build the vector that will be used to initialize the paraglob structure
+  # Skip any files that aren't relevant to this script
+  if (name != "ransomware_patterns")
+    return;
 
-    # Initialize vector (for Paraglob)
-    local ransomware_filename_patterns_vector: vector of string;
-    # Populate the vector with the records from the table
-    for (idx in ransomware_filename_patterns_table)
-      {
-      ransomware_filename_patterns_vector += ransomware_filename_patterns_table[idx]$rw_pattern;
-      }
-    # initialize the paraglob structure
-    ransomware_filename_patterns_paraglob = paraglob_init(ransomware_filename_patterns_vector);
+  # Now all data is in the table
+  # Build the vector that will be used to initialize the paraglob structure
+
+  # Initialize vector (for Paraglob)
+  local ransomware_filename_patterns_vector: vector of string;
+  # Populate the vector with the records from the table
+  for (idx in ransomware_filename_patterns_table)
+    {
+    ransomware_filename_patterns_vector += ransomware_filename_patterns_table[idx]$rw_pattern;
     }
+  # Initialize the paraglob structure
+  ransomware_filename_patterns_paraglob = paraglob_init(ransomware_filename_patterns_vector);
   }
 
-# we will use the Files::log_files event to determine when there is a file entry to inspect
+# We will use the Files::log_files event to determine when there is a file entry to inspect
 event Files::log_files(rec: Files::Info)
   {
-  if ( rec$source == "SMB" )
+  # Skip any files not in SMB/Windows File Sharing
+  if ( rec$source != "SMB" )
+    return;
+
+  # Test for matches in the paraglob set
+  local num_matches = |paraglob_match(ransomware_filename_patterns_paraglob, rec$filename)|;
+  # see if there were any matches
+  if ( num_matches > 0 )
     {
-    # test for matches in the paraglob set
-    local num_matches = |paraglob_match(ransomware_filename_patterns_paraglob, rec$filename)|;
-    # see if there were any matches
-    if ( num_matches > 0 )
+    for (tx_host in rec$tx_hosts)
       {
-      for (tx_host in rec$tx_hosts)
+      for (cuid in rec$conn_uids)
         {
-        for (cuid in rec$conn_uids)
+        for (rx_host in rec$rx_hosts)
           {
-          for (rx_host in rec$rx_hosts)
-            {
-            NOTICE([$note=Ransomware::KnownBadFilename,
-              $msg=fmt("Detected potential ransomware! Known bad file name: %s in use by client %s on file server %s", rec$filename, tx_host, rx_host),
-              $src=tx_host,  $dst=rx_host, $uid=cuid]);
-            }
+          NOTICE([$note=Ransomware::KnownBadFilename,
+            $msg=fmt("Detected potential ransomware! Known bad file name: %s in use by client %s on file server %s", rec$filename, tx_host, rx_host),
+            $src=tx_host,  $dst=rx_host, $uid=cuid]);
           }
         }
       }
