@@ -61,8 +61,8 @@ event Input::end_of_data(name: string, source: string)
 # We will use the Files::log_files event to determine when there is a file entry to inspect
 event Files::log_files(rec: Files::Info)
   {
-  # Skip any files not in SMB/Windows File Sharing
-  if ( rec$source != "SMB" )
+  # Skip any files not in SMB/Windows File Sharing or without filenames
+  if ( rec$source != "SMB" || !rec?$filename)
     return;
 
   # Test for matches in the paraglob set
