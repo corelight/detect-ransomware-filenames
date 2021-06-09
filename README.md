@@ -10,7 +10,30 @@ A Python script (`download-list.py`) is included to be able to refresh the
 list periodically. By default, it will download the new file to the `inputs/`
 folder.
 
-Use `zkg` to install this, the way you would any Zeek package.
+## Installing
+
+This package is available via `zkg`, however since it has two parts (the script
+and the input file), it's often better to install it manually.
+
+### For Zeek
+
+For Zeek, place the `scripts/check-for-ransomware-filenames.zeek` script and
+`inputs/fsrm_patterns_for_zeek.tsv` files into a directory together, then edit
+your `local.zeek` file to add a line like the following:
+
+`@load /path/to/check-for-ransomware-filenames.zeek`
+
+### For Corelight
+
+For a Corelight appliance, use `zkg` to add this repository to a custom bundle,
+with any other custom packages that you want to load. Use `corelight-client` to
+install this bundle.
+
+Then, use `corelight-client` to load the Input file, like so:
+
+`corelight-client -b <sensor IP> bro input upload --name fsrm_patterns_for_zeek.tsv --file fsrm_patterns_for_zeek.tsv`
+
+## Sample Output
 
 The script generates notices like the following:
 
