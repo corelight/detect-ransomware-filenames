@@ -67,20 +67,40 @@ event Files::log_files(rec: Files::Info)
 
   # Test for matches in the paraglob set
   local num_matches = |paraglob_match(ransomware_filename_patterns_paraglob, rec$filename)|;
-  # see if there were any matches
-  if ( num_matches > 0 )
-    {
-    for (tx_host in rec$tx_hosts)
+
+  # Have to test the Zeek version since the files.log changed in v5
+  # See here: https://docs.zeek.org/en/master/scripts/policy/frameworks/files/deprecated-txhosts-rxhosts-connuids.zeek.html
+  @if ( Version::info$major >= 5 )
+  # Handle the v5 files log
+    # see if there were any matches
+    if ( num_matches > 0 )
       {
-      for (cuid in rec$conn_uids)
+      # Handle the alert (Zeek >= 5)
+      NOTICE([$note=Ransomware::KnownBadFilename,
+              $msg=fmt("Detected potential ransomware! Known bad file name: %s detected in connection [id.orig_h: %s, id.resp_h: %s, uid: %s]", rec$filename, rec$id$orig_h, rec$id$resp_h, rec$uid),
+              $src=rec$id$orig_h,  $dst=rec$id$resp_h, $uid=rec$uid]);
+      }
+  @else
+  # Handle the v4 and below files log
+    # see if there were any matches
+    if ( num_matches > 0 )
+      {
+      if ( rec?$tx_hosts && rec?$rx_hosts )
         {
-        for (rx_host in rec$rx_hosts)
+        for (tx_host in rec$tx_hosts)
           {
-          NOTICE([$note=Ransomware::KnownBadFilename,
-            $msg=fmt("Detected potential ransomware! Known bad file name: %s in use by client %s on file server %s", rec$filename, tx_host, rx_host),
-            $src=tx_host,  $dst=rx_host, $uid=cuid]);
+          for (cuid in rec$conn_uids)
+            {
+            for (rx_host in rec$rx_hosts)
+              {
+              NOTICE([$note=Ransomware::KnownBadFilename,
+                $msg=fmt("Detected potential ransomware! Known bad file name: %s in use by client %s on file server %s", rec$filename, tx_host, rx_host),
+                $src=tx_host,  $dst=rx_host, $uid=cuid]);
+              }
+            }
           }
+        return;
         }
       }
-    }
+  @endif
   }
