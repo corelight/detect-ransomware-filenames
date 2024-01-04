@@ -70,7 +70,7 @@ event Files::log_files(rec: Files::Info)
 
   # Have to test the Zeek version since the files.log changed in v5
   # See here: https://docs.zeek.org/en/master/scripts/policy/frameworks/files/deprecated-txhosts-rxhosts-connuids.zeek.html
-  @if ( Version::info$major >= 5 )
+  @if ( Version::info$major >= 5 && Version::info$minor >= 1 )
   # Handle the v5 files log
     # see if there were any matches
     if ( num_matches > 0 )
